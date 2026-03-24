@@ -85,25 +85,25 @@ export default function App() {
     const toastId = toast.loading("Connecting to Google...");
     try {
       await signInWithPopup(auth, googleProvider);
+      setIsLoggingIn(false);
       toast.success("Welcome to Health Shock Shield!", { id: toastId });
     } catch (error: any) {
       setIsLoggingIn(false);
-      console.error("Login failed", error);
+      console.error("Login error code:", error.code);
+      console.error("Login error message:", error.message);
       
       if (error.code === "auth/popup-closed-by-user") {
         toast.error("Login cancelled. Please complete the sign-in in the popup.", { 
           id: toastId,
           description: "The sign-in window was closed before completion."
         });
-      } else if (error.code === "auth/cancelled-popup-request") {
-        toast.error("Multiple login attempts detected.", { id: toastId });
       } else if (error.code === "auth/popup-blocked") {
-        toast.error("Popup blocked by browser.", { 
-          id: toastId, 
-          description: "Please allow popups for this site to sign in." 
-        });
+        toast.error("Popup blocked by browser. Please allow popups.", { id: toastId });
       } else {
-        toast.error("Login failed. Please try again.", { id: toastId });
+        toast.error("Login failed.", { 
+          id: toastId,
+          description: error.message || "Please try again." 
+        });
       }
     }
   };
@@ -113,6 +113,7 @@ export default function App() {
       await signOut(auth);
       setStep("personal");
       setResult(null);
+      toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout failed", error);
     }
