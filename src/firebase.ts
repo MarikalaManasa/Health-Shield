@@ -8,5 +8,9 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const googleProvider = new GoogleAuthProvider();
 
+// Configure Google Provider with required scopes
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
+
 export { signInWithPopup, signOut, onAuthStateChanged };
 export type { User };

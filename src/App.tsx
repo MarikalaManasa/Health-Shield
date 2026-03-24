@@ -40,8 +40,10 @@ type FormStep = "personal" | "health" | "lifestyle" | "history" | "financial" | 
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [demoEmail, setDemoEmail] = useState("");
+  const [demoPassword, setDemoPassword] = useState("");
   const [step, setStep] = useState<FormStep>("personal");
   const [formData, setFormData] = useState<UserInput>({
     age: 30,
@@ -73,44 +75,42 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // Demo mode: No Firebase auth needed
+    setLoading(false);
   }, []);
 
   const handleLogin = async () => {
+    if (!demoEmail || !demoPassword) {
+      toast.error("Please enter email and password");
+      return;
+    }
+    
     setIsLoggingIn(true);
-    const toastId = toast.loading("Connecting to Google...");
+    const toastId = toast.loading("Logging in...");
     try {
-      await signInWithPopup(auth, googleProvider);
+      // Demo mode: Create a fake user
+      const demoUser = {
+        uid: "demo-" + Date.now(),
+        displayName: demoEmail.split("@")[0],
+        email: demoEmail,
+        photoURL: null,
+      } as any;
+      
+      setUser(demoUser);
+      setDemoEmail("");
+      setDemoPassword("");
       setIsLoggingIn(false);
-      toast.success("Welcome to Health Shock Shield!", { id: toastId });
+      toast.success("Welcome to Health Shock Shield! (Demo Mode)", { id: toastId });
     } catch (error: any) {
       setIsLoggingIn(false);
-      console.error("Login error code:", error.code);
-      console.error("Login error message:", error.message);
-      
-      if (error.code === "auth/popup-closed-by-user") {
-        toast.error("Login cancelled. Please complete the sign-in in the popup.", { 
-          id: toastId,
-          description: "The sign-in window was closed before completion."
-        });
-      } else if (error.code === "auth/popup-blocked") {
-        toast.error("Popup blocked by browser. Please allow popups.", { id: toastId });
-      } else {
-        toast.error("Login failed.", { 
-          id: toastId,
-          description: error.message || "Please try again." 
-        });
-      }
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.", { id: toastId });
     }
   };
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      setUser(null);
       setStep("personal");
       setResult(null);
       toast.success("Logged out successfully");
@@ -997,9 +997,33 @@ export default function App() {
                   </div>
                 </div>
 
+                <div className="space-y-4 mt-10">
+                  <div>
+                    <label className="text-sm font-bold text-gray-400 uppercase tracking-widest">Email (Demo)</label>
+                    <input
+                      type="email"
+                      value={demoEmail}
+                      onChange={(e) => setDemoEmail(e.target.value)}
+                      placeholder="Enter any email"
+                      className="w-full p-4 rounded-2xl border-2 border-gray-100 focus:border-blue-600 focus:outline-none bg-gray-50/50 transition-all font-medium text-lg mt-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-gray-400 uppercase tracking-widest">Password (Demo)</label>
+                    <input
+                      type="password"
+                      value={demoPassword}
+                      onChange={(e) => setDemoPassword(e.target.value)}
+                      placeholder="Enter any password"
+                      className="w-full p-4 rounded-2xl border-2 border-gray-100 focus:border-blue-600 focus:outline-none bg-gray-50/50 transition-all font-medium text-lg mt-2"
+                    />
+                  </div>
+                </div>
+
                 <button 
                   onClick={handleLogin}
-                  className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[32px] text-xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 group"
+                  disabled={isLoggingIn}
+                  className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[32px] text-xl font-bold hover:bg-blue-700 disabled:bg-gray-400 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 group"
                 >
                   Get Started <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </button>
