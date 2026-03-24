@@ -1,0 +1,5 @@
+{
+  "name": "Health Shock Shield",
+  "description": "Map health inputs to potential conditions and estimate associated financial costs and savings gaps.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "User profile data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email"]
+    },
+    "audits": {
+      "title": "Health Audit",
+      "description": "User's health and financial audit results",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "formData": { "type": "object" },
+        "result": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "formData", "result", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile information"
+    },
+    "/users/{userId}/audits/{auditId}": {
+      "schema": "audits",
+      "description": "Historical audit results for the user"
+    }
+  }
+}
